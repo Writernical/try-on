@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Virtual Trial Room</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --warm: #f59e0b;
+    --coral: #ef4444;
+    --green: #16a34a;
+    --whatsapp: #25D366;
+    --bg: #fdf6ee;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --muted: #888;
+    --light: #f5f5f5;
+    --border: #e5e5e5;
+    --gradient: linear-gradient(135deg, var(--warm), var(--coral));
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(145deg, #fdf6ee 0%, #fef9f3 40%, #f0ebe4 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    color: var(--text);
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 32px 24px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Typography */
+  .brand { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700; margin: 8px 0 0; }
+  .tagline { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 2.5px; font-weight: 500; margin-top: 4px; }
+  .step-title { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 20px; }
+  .footer { font-size: 12px; color: #bbb; margin-top: 18px; text-align: center; }
+
+  /* Logo */
+  .logo { width: 64px; height: 64px; border-radius: 50%; background: var(--gradient); display: inline-flex; align-items: center; justify-content: center; font-size: 30px; }
+
+  /* Divider */
+  .divider { height: 1px; background: #eee; margin: 18px auto; width: 60%; }
+
+  /* Welcome text */
+  .welcome-text { font-size: 15px; color: #555; line-height: 1.6; margin-bottom: 20px; }
+
+  /* Features */
+  .features { text-align: left; max-width: 270px; margin: 0 auto 22px; }
+  .feature { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .feature-num {
+    width: 26px; height: 26px; border-radius: 50%; background: #fef3c7; color: #b45309;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .feature span:last-child { font-size: 14px; color: #444; }
+
+  /* Buttons */
+  .btn-primary {
+    background: var(--gradient); color: #fff; border: none; border-radius: 12px;
+    padding: 14px 24px; font-size: 16px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; font-family: inherit; transition: transform 0.15s, opacity 0.15s;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; }
+
+  .btn-ghost {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 18px; font-size: 14px; font-weight: 500;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+  }
+
+  .btn-whatsapp {
+    background: var(--whatsapp); color: #fff; border: none; border-radius: 12px;
+    padding: 14px 24px; font-size: 15px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; margin-bottom: 12px; font-family: inherit;
+  }
+
+  .btn-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; }
+
+  /* Input */
+  .input-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; margin-top: 18px; }
+  .input-field {
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
+    font-size: 14px; width: 100%; text-align: center; outline: none; color: #333; font-family: inherit;
+  }
+  .input-field:focus { border-color: var(--warm); }
+
+  /* API key setup */
+  .setup-box {
+    background: #fefce8; border: 1px solid #fde68a; border-radius: 12px; padding: 14px;
+    margin-bottom: 16px; font-size: 13px; color: #92400e; line-height: 1.5;
+  }
+  .setup-box a { color: #b45309; font-weight: 600; }
+  .api-input {
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
+    font-size: 13px; width: 100%; outline: none; color: #333; font-family: 'DM Sans', monospace;
+    text-align: left;
+  }
+
+  /* Progress */
+  .progress { display: flex; justify-content: space-between; margin-bottom: 24px; padding: 0 8px; }
+  .progress-step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+  .progress-dot {
+    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 13px; font-weight: 700; transition: background 0.3s;
+  }
+  .progress-label { font-size: 11px; font-weight: 500; }
+
+  /* Upload zone */
+  .drop-zone {
+    border: 2px dashed #ddd; border-radius: 16px; padding: 40px 20px;
+    text-align: center; cursor: pointer; background: #fafafa; margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .drop-zone:hover { border-color: var(--warm); }
+  .drop-zone svg { color: #ccc; margin-bottom: 10px; }
+  .drop-label { font-size: 15px; font-weight: 600; color: #555; margin-bottom: 4px; }
+  .drop-hint { font-size: 12px; color: #bbb; }
+
+  .uploaded-wrap { position: relative; border-radius: 16px; overflow: hidden; margin-bottom: 20px; background: var(--light); }
+  .uploaded-img { width: 100%; max-height: 280px; object-fit: contain; display: block; }
+  .change-btn {
+    position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff;
+    border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; cursor: pointer; font-weight: 600;
+  }
+
+  /* Result */
+  .result-grid { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 20px 0; }
+  .result-img-wrap { flex: 1; border-radius: 14px; overflow: hidden; background: var(--light); position: relative; }
+  .result-img { width: 100%; height: 180px; object-fit: cover; display: block; }
+  .result-label {
+    position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5);
+    color: #fff; font-size: 11px; padding: 4px 0; text-align: center; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .plus-sign { font-size: 24px; font-weight: 300; color: #ccc; flex-shrink: 0; }
+
+  /* AI box */
+  .ai-box { background: #fefce8; border: 1px solid #fde68a; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+  .ai-header { font-size: 13px; font-weight: 700; color: #b45309; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .ai-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; }
+  .ai-text { font-size: 14px; color: #555; line-height: 1.6; white-space: pre-wrap; }
+  .analyzing { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+  .spinner { width: 18px; height: 18px; border: 2px solid #eee; border-top-color: var(--warm); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+  .text-center { text-align: center; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ WELCOME SCREEN ═══════ -->
+<div class="card text-center" id="screen-welcome" style="position:relative;">
+  <div><div class="logo" id="logo-tap" title="Welcome!">👗</div></div>
+  <h1 class="brand" id="display-name">StyleFit</h1>
+  <p class="tagline">Virtual Trial Room</p>
+  <p style="font-size:11px; color:#bbb; margin-top:4px;">by <strong style="color:#b45309;">Writernical</strong></p>
+  <div class="divider"></div>
+  <p class="welcome-text">See how clothes look on you — no changing room needed. Upload your photo, pick an outfit, and get instant styling advice.</p>
+  <div class="features">
+    <div class="feature"><span class="feature-num">1</span><span>Upload your photo</span></div>
+    <div class="feature"><span class="feature-num">2</span><span>Pick any outfit</span></div>
+    <div class="feature"><span class="feature-num">3</span><span>Get AI styling tips</span></div>
+    <div class="feature"><span class="feature-num">4</span><span>Share on WhatsApp</span></div>
+  </div>
+  <button class="btn-primary" onclick="startTryOn()">Start Try-On →</button>
+
+  <!-- Hidden settings panel for shop owner -->
+  <div id="settings-panel" class="hidden" style="margin-top:20px; text-align:left; border-top:1px solid #eee; padding-top:16px;">
+    <p style="font-size:13px; font-weight:700; color:#b45309; margin-bottom:12px;">🔧 Shop Owner Settings</p>
+    <label class="input-label">Shop Name</label>
+    <input class="input-field" id="shop-name" value="StyleFit" style="text-align:left;margin-bottom:12px;" oninput="document.getElementById('display-name').textContent=this.value; localStorage.setItem('shop_name',this.value);">
+    <label class="input-label">Gemini API Key</label>
+    <input class="api-input" id="api-key" type="password" placeholder="Paste your Gemini API key..." style="margin-bottom:6px;">
+    <div style="font-size:11px; color:#999; margin-bottom:12px;">
+      Get free key → <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#b45309;">aistudio.google.com/apikey</a>
+      <br>Free: 15 requests/min. Key stays on this device only.
+    </div>
+    <button class="btn-primary" style="font-size:14px; padding:10px 16px;" onclick="saveSettings()">💾 Save Settings</button>
+    <div id="settings-saved" class="hidden" style="color:#16a34a; font-size:13px; margin-top:8px; text-align:center;">✅ Settings saved!</div>
+    <div id="key-error" class="hidden" style="color:#ef4444; font-size:13px; margin-top:8px; text-align:center;">Please enter your API key</div>
+  </div>
+</div>
+
+<!-- ═══════ SELFIE SCREEN ═══════ -->
+<div class="card hidden" id="screen-selfie">
+  <div class="progress">
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#f59e0b;color:#fff;">1</div>
+      <span class="progress-label" style="color:#1a1a1a;">Your Photo</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#e2e2e2;color:#999;">2</div>
+      <span class="progress-label" style="color:#999;">Clothing</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#e2e2e2;color:#999;">3</div>
+      <span class="progress-label" style="color:#999;">Try-On</span>
+    </div>
+  </div>
+  <h2 class="step-title">Upload Your Photo</h2>
+  <p class="step-desc">A front-facing photo works best. Your photo stays on this device.</p>
+
+  <div class="drop-zone" id="selfie-drop" onclick="document.getElementById('selfie-input').click()">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    <p class="drop-label">Your Photo</p>
+    <p class="drop-hint">Tap or drag photo here</p>
+  </div>
+  <div class="uploaded-wrap hidden" id="selfie-preview-wrap">
+    <img id="selfie-preview" class="uploaded-img">
+    <button class="change-btn" onclick="document.getElementById('selfie-input').click()">Change</button>
+  </div>
+  <input type="file" accept="image/*" id="selfie-input" style="display:none" onchange="handleUpload(this,'selfie')">
+
+  <div class="btn-row">
+    <button class="btn-ghost" onclick="goTo('welcome')">← Back</button>
+    <button class="btn-primary" style="flex:1" id="selfie-next" disabled onclick="goTo('clothing')">Next →</button>
+  </div>
+</div>
+
+<!-- ═══════ CLOTHING SCREEN ═══════ -->
+<div class="card hidden" id="screen-clothing">
+  <div class="progress">
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#16a34a;color:#fff;">✓</div>
+      <span class="progress-label" style="color:#1a1a1a;">Your Photo</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#f59e0b;color:#fff;">2</div>
+      <span class="progress-label" style="color:#1a1a1a;">Clothing</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#e2e2e2;color:#999;">3</div>
+      <span class="progress-label" style="color:#999;">Try-On</span>
+    </div>
+  </div>
+  <h2 class="step-title">Upload Clothing</h2>
+  <p class="step-desc">Take a photo of the dress, shirt, or outfit you want to try.</p>
+
+  <div class="drop-zone" id="clothing-drop" onclick="document.getElementById('clothing-input').click()">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+    <p class="drop-label">Clothing Photo</p>
+    <p class="drop-hint">Tap or drag photo here</p>
+  </div>
+  <div class="uploaded-wrap hidden" id="clothing-preview-wrap">
+    <img id="clothing-preview" class="uploaded-img">
+    <button class="change-btn" onclick="document.getElementById('clothing-input').click()">Change</button>
+  </div>
+  <input type="file" accept="image/*" id="clothing-input" style="display:none" onchange="handleUpload(this,'clothing')">
+
+  <div class="btn-row">
+    <button class="btn-ghost" onclick="goTo('selfie')">← Back</button>
+    <button class="btn-primary" style="flex:1" id="clothing-next" disabled onclick="doTryOn()">See My Look ✨</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT SCREEN ═══════ -->
+<div class="card hidden" id="screen-result">
+  <div class="progress">
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#16a34a;color:#fff;">✓</div>
+      <span class="progress-label" style="color:#1a1a1a;">Your Photo</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#16a34a;color:#fff;">✓</div>
+      <span class="progress-label" style="color:#1a1a1a;">Clothing</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-dot" style="background:#f59e0b;color:#fff;">3</div>
+      <span class="progress-label" style="color:#1a1a1a;">Try-On</span>
+    </div>
+  </div>
+  <h2 class="step-title">Your Look</h2>
+
+  <div class="result-grid">
+    <div class="result-img-wrap">
+      <img id="result-selfie" class="result-img">
+      <span class="result-label">You</span>
+    </div>
+    <div class="plus-sign">+</div>
+    <div class="result-img-wrap">
+      <img id="result-clothing" class="result-img">
+      <span class="result-label">Outfit</span>
+    </div>
+  </div>
+
+  <div class="ai-box">
+    <div class="ai-header"><span class="ai-dot"></span> AI Styling Tips</div>
+    <div id="ai-loading" class="analyzing"><div class="spinner"></div><span>Analyzing your look...</span></div>
+    <p id="ai-result" class="ai-text hidden"></p>
+  </div>
+
+  <button class="btn-whatsapp" onclick="shareWhatsApp()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Share on WhatsApp
+  </button>
+
+  <div class="btn-row" style="justify-content:center;">
+    <button class="btn-ghost" onclick="tryAnother()">Try Another Outfit</button>
+  </div>
+</div>
+
+<p class="footer" id="footer-text">Powered by <strong>Writernical</strong> • No data stored</p>
+
+<script>
+  // ─── STATE ───
+  let selfieData = null;
+  let clothingData = null;
+  let aiTipsText = '';
+
+  // Load API key: URL param > localStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  let apiKey = urlParams.get('key') || localStorage.getItem('gemini_key') || '';
+  if (urlParams.get('key')) {
+    localStorage.setItem('gemini_key', urlParams.get('key'));
+    // Hide key from URL bar so customers can't see it
+    const cleanUrl = new URL(window.location);
+    cleanUrl.searchParams.delete('key');
+    window.history.replaceState({}, '', cleanUrl);
+  }
+
+  // Load shop name
+  const savedShop = urlParams.get('shop') || localStorage.getItem('shop_name') || 'StyleFit';
+  document.getElementById('shop-name').value = savedShop;
+  document.getElementById('display-name').textContent = savedShop;
+  if (urlParams.get('shop')) localStorage.setItem('shop_name', urlParams.get('shop'));
+
+  // ─── SETTINGS (secret triple-tap on logo) ───
+  let tapCount = 0;
+  let tapTimer = null;
+  document.getElementById('logo-tap').addEventListener('click', () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+    if (tapCount >= 3) {
+      tapCount = 0;
+      toggleSettings();
+    }
+  });
+
+  function toggleSettings() {
+    const panel = document.getElementById('settings-panel');
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) {
+      document.getElementById('api-key').value = apiKey;
+    }
+  }
+
+  function saveSettings() {
+    const key = document.getElementById('api-key').value.trim();
+    if (!key) {
+      document.getElementById('key-error').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('key-error').classList.add('hidden');
+    apiKey = key;
+    localStorage.setItem('gemini_key', key);
+    localStorage.setItem('shop_name', document.getElementById('shop-name').value);
+    document.getElementById('settings-saved').classList.remove('hidden');
+    setTimeout(() => document.getElementById('settings-saved').classList.add('hidden'), 2000);
+  }
+
+  function startTryOn() {
+    if (!apiKey) {
+      // Show settings panel with error
+      document.getElementById('settings-panel').classList.remove('hidden');
+      document.getElementById('key-error').classList.remove('hidden');
+      document.getElementById('key-error').textContent = 'Shop owner: triple-tap the 👗 logo to open settings and add API key';
+      return;
+    }
+    goTo('selfie');
+  }
+
+  // ─── NAVIGATION ───
+  function goTo(screen) {
+    document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+    const el = document.getElementById('screen-' + screen);
+    el.classList.remove('hidden');
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  }
+
+  // ─── FILE UPLOAD ───
+  function handleUpload(input, type) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = e.target.result;
+      if (type === 'selfie') {
+        selfieData = data;
+        document.getElementById('selfie-preview').src = data;
+        document.getElementById('selfie-drop').classList.add('hidden');
+        document.getElementById('selfie-preview-wrap').classList.remove('hidden');
+        document.getElementById('selfie-next').disabled = false;
+      } else {
+        clothingData = data;
+        document.getElementById('clothing-preview').src = data;
+        document.getElementById('clothing-drop').classList.add('hidden');
+        document.getElementById('clothing-preview-wrap').classList.remove('hidden');
+        document.getElementById('clothing-next').disabled = false;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ─── DRAG & DROP ───
+  ['selfie-drop', 'clothing-drop'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('dragover', e => { e.preventDefault(); el.style.borderColor = '#f59e0b'; });
+    el.addEventListener('dragleave', () => { el.style.borderColor = '#ddd'; });
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.style.borderColor = '#ddd';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const type = id.includes('selfie') ? 'selfie' : 'clothing';
+        const input = document.getElementById(type + '-input');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        handleUpload(input, type);
+      }
+    });
+  });
+
+  // ─── GEMINI API CALL ───
+  async function doTryOn() {
+    goTo('result');
+    document.getElementById('result-selfie').src = selfieData;
+    document.getElementById('result-clothing').src = clothingData;
+    document.getElementById('ai-loading').classList.remove('hidden');
+    document.getElementById('ai-result').classList.add('hidden');
+
+    const selfieBase64 = selfieData.split(',')[1];
+    const clothingBase64 = clothingData.split(',')[1];
+    const selfieMime = selfieData.split(';')[0].split(':')[1];
+    const clothingMime = clothingData.split(';')[0].split(':')[1];
+
+    try {
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { inlineData: { mimeType: selfieMime, data: selfieBase64 } },
+                { inlineData: { mimeType: clothingMime, data: clothingBase64 } },
+                { text: "Image 1 is a person's photo. Image 2 is a clothing item they want to try on.\n\nYou are a friendly Indian fashion stylist. Give styling tips in 4 bullet points:\n• Does this outfit's color and style work well? (Judge ONLY based on the clothing style, fabric, occasion-fit, and color harmony of the outfit itself. NEVER comment on skin tone, complexion, body shape, or physical appearance.)\n• What Indian accessories or footwear to pair with it? (e.g., juttis, kolhapuris, oxidised jewellery, dupatta, stole, mojris)\n• When/where to wear it — wedding, office, festive, casual outing, pooja, college, etc.\n• A search link to find similar styles: suggest ONE link in this exact format — 'Find similar: https://www.myntra.com/search?q=KEYWORD' where KEYWORD is a short product term like 'kurti+set' or 'cotton+saree'. Rotate between Myntra, Ajio (https://www.ajio.com/search/?text=KEYWORD), and Flipkart (https://www.flipkart.com/search?q=KEYWORD).\n\nKeep it casual, fun, and under 100 words. Use Indian English. No headings, no markdown formatting." }
+              ]
+            }]
+          })
+        }
+      );
+
+      const data = await resp.json();
+
+      if (data.error) {
+        throw new Error(data.error.message || 'API error');
+      }
+
+      aiTipsText = data.candidates?.[0]?.content?.parts?.[0]?.text
+        || '• This outfit has a lovely color palette — perfect for a festive outing or family gathering!\n• Pair with oxidised jhumkas and kolhapuri chappals for the complete desi look.\n• Great for: Pooja, Diwali parties, casual mehendi functions.\n• Find similar: https://www.myntra.com/search?q=ethnic+kurta+set';
+    } catch (err) {
+      console.error('Gemini error:', err);
+      aiTipsText = '• This outfit has a lovely color palette — perfect for a festive outing or family gathering!\n• Pair with oxidised jhumkas and kolhapuri chappals for the complete desi look.\n• Great for: Pooja, Diwali parties, casual mehendi functions.\n• Find similar: https://www.ajio.com/search/?text=ethnic+wear';
+    }
+
+    document.getElementById('ai-loading').classList.add('hidden');
+    document.getElementById('ai-result').innerHTML = aiTipsText.replace(
+      /(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#b45309;font-weight:600;word-break:break-all;">$1</a>'
+    );
+    document.getElementById('ai-result').classList.remove('hidden');
+  }
+
+  // ─── WHATSAPP SHARE ───
+  function shareWhatsApp() {
+    const shop = document.getElementById('shop-name').value || 'StyleFit';
+    const msg = encodeURIComponent(
+      `👗 I just tried a new look at ${shop}!\n\n${aiTipsText}\n\nTry it yourself — ask the shop for their Virtual Trial Room link!\n\nPowered by Writernical`
+    );
+    window.open(`https://wa.me/?text=${msg}`, '_blank');
+  }
+
+  // ─── TRY ANOTHER ───
+  function tryAnother() {
+    clothingData = null;
+    document.getElementById('clothing-drop').classList.remove('hidden');
+    document.getElementById('clothing-preview-wrap').classList.add('hidden');
+    document.getElementById('clothing-next').disabled = true;
+    document.getElementById('clothing-input').value = '';
+    goTo('clothing');
+  }
+</script>
+</body>
+</html>
